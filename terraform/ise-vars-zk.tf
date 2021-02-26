@@ -3,7 +3,7 @@
 ################
 provider "aws" {
   profile = "default"
-  region  = "" # aws region here 
+  region  = "us-gov-west-1" # aws region here 
   alias   = "region-master"
 }
 variable "env-loc" {
@@ -50,7 +50,7 @@ variable "vxlan-port" {
 #######################
 variable "my-cidr-ssh-allow-in" {
   type    = list(string)
-  default = [""] # your cidr here for ssh conns into sensor cluster
+  default = ["199.68.205.0/24"] # your cidr here for ssh conns into sensor cluster
 }
 variable "vxlan-cidr-allow-in" {
   type    = list(string)
@@ -65,7 +65,7 @@ variable "cidr-allow-out" {
 ############
 variable "instances-per-subnet" {
   type    = number
-  default = 1 # If changing, ensure outputs reflect this 
+  default = 1 # If changing, ensure you alter the outputs file to reflect this 
 }
 variable "volume-space" {
   type    = number
@@ -89,5 +89,13 @@ variable "instance-type" {
 }
 variable "default-ami" {
   type    = string
-  default = "" # ami id for image leveraged 
+  default = "ami-05f5c164" # ami id for image leveraged 
+}
+##########################
+# TRAFFIC MIRRORING VARS #
+##########################
+# See ise-trf-mir-zk file to add sessions and ec2 instance names
+variable "session-number" {
+  type    = number
+  default = 3 # starting session number, ensure this doesnt clash with other mirroring sessions already in place
 }

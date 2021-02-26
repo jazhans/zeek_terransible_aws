@@ -16,7 +16,7 @@ resource "aws_instance" "ise-ec2-zk-sensor-a" {
   vpc_security_group_ids      = [aws_security_group.ise-sg-zk.id]
   subnet_id                   = aws_subnet.ise-sn-zk[0].id
   tags = {
-    Name = "${var.businees-unit}-${var.env-loc}-ec2-sensor-zk-a-${count.index + 1}"
+    Name = "${var.business-unit}-${var.env-loc}-ec2-sensor-zk-a-${count.index + 1}"
     business_unit = var.business-unit
     Environment   = var.env-loc
   }
