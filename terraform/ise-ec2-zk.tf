@@ -1,7 +1,7 @@
 # Create a key pair for logging into EC2 in us-gov-west-1
 resource "aws_key_pair" "ise-ky-zk" {
   provider   = aws.region-master
-  key_name   = "ise-${var.env-loc}-ky-zk"
+  key_name   = "${var.business-unit}-${var.env-loc}-ky-zk"
   public_key = file("~/.ssh/id_rsa.pub")
 }
 # Sensors tuneable to have multiple instances per subnet

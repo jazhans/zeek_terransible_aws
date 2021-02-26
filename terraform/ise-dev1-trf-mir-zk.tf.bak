@@ -1,3 +1,6 @@
+# EXAMPLE TRAFFIC MIRRORING SETUP VIA TERRAFORM, MAY BE EASIER TO SETUP MANUALLY
+# WILL BE ATTEMPTING TO ADD A FOR EACH TRAFFIC SOURCE ENI IN VAR, CREATE MIRROR SESSION
+# MORE TO COME...
 # Resources ingesting mirrored Traffic
 resource "aws_ec2_traffic_mirror_target" "zeek_target" {
   provider             = aws.region-master
