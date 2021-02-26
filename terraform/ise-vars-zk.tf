@@ -3,7 +3,7 @@
 ################
 provider "aws" {
   profile = "default"
-  region  = "us-gov-west-1" # aws region here 
+  region  = "" # aws region here 
   alias   = "region-master"
 }
 variable "env-loc" {
@@ -50,7 +50,7 @@ variable "vxlan-port" {
 #######################
 variable "my-cidr-ssh-allow-in" {
   type    = list(string)
-  default = ["199.68.205.0/24"] # your cidr here for ssh conns into sensor cluster
+  default = [""] # your cidr here for ssh conns into sensor cluster
 }
 variable "vxlan-cidr-allow-in" {
   type    = list(string)
@@ -89,7 +89,7 @@ variable "instance-type" {
 }
 variable "default-ami" {
   type    = string
-  default = "ami-05f5c164" # ami id for image leveraged 
+  default = "" # ami id for image leveraged Most Appropriate would be AL2, Cent, RedHat
 }
 ##########################
 # TRAFFIC MIRRORING VARS #
