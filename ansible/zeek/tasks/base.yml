@@ -1,0 +1,59 @@
+---
+# Base installs for all nodes
+# This install all the required software necessary to be apart of the zeek cluster
+- name: See if Cmake src is downloaded...
+  stat:
+    path: "{{ cmake_src_dir }}.tar.gz"
+  register: cmake_src
+
+- name: See if Cmake is installed and Compiled...
+  stat:
+    path: "{{ cmake_src_dir }}/bin/cmake"
+  register: cmake_installed
+
+- name: Update Yum
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install dependencies
+  yum:
+    name: "{{ packages }}"
+    state: present
+
+- name: Download Cmake
+  get_url:
+    url: "{{ cmake_url }}"
+    dest: "{{ cmake_src_loc }}"
+  when: cmake_src.stat.exists == False
+
+- name: Unpack Cmake
+  unarchive:
+    src: "{{ cmake_src_dir }}.tar.gz"
+    dest: "{{ cmake_src_loc }}"
+    remote_src: yes
+  when: cmake_installed.stat.exists == False
+
+- name: Configure Cmake
+  shell: ./bootstrap 
+  args:
+    chdir: "{{ cmake_src_dir }}"
+  when: cmake_installed.stat.exists == False
+
+- name: Make Cmake
+  make:
+    chdir: "{{ cmake_src_dir }}"
+  ignore_unreachable: yes
+  when: cmake_installed.stat.exists == False
+
+- name: Make Install Cmake
+  make:
+    chdir: "{{ cmake_src_dir }}"
+    target: install
+  ignore_unreachable: yes
+  when: cmake_installed.stat.exists == False
+
+- name: Wait until Cmake binary file is present...
+  wait_for:
+    path: "{{ cmake_src_dir }}/bin/cmake"
+  ignore_unreachable: yes

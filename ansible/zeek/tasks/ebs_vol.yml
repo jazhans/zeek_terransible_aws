@@ -1,0 +1,19 @@
+---
+# Tasks for mounting io1 ebs volume 
+- name: Create Zeek Log Dir
+  file:
+    state: directory
+    path: "{{ zeek_log_dir }}"
+    
+- name: Format Log Volume of XFS
+  filesystem:
+    dev: "{{ ebs_dev }}" #/dev/nvme1n1
+    fstype: xfs
+
+- name: mounting the filesystem
+  mount:
+    name: "{{ zeek_log_dir }}"
+    src: "{{ ebs_dev }}"
+    fstype: xfs
+    opts: rw,nosuid,nodev,noexec,noatime,seclabel,attr2,inode64,noquota
+    state: mounted

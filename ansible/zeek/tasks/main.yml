@@ -1,0 +1,32 @@
+---
+# tasks file for zeek
+- name: Include tasks for manager instances
+  include_tasks: "{{ item }}"
+  loop:
+    - base.yml
+    - pf_ring.yml
+    - zeek.yml
+  when: host_type == "manager"
+
+- name: Include tasks for worker instances
+  include_tasks: "{{ item }}"
+  loop:
+    - base.yml
+    - pf_ring.yml
+  when: host_type == "workers"
+
+- name: Include tasks for logger instances
+  include_tasks: "{{ item }}"
+  loop:
+    - base.yml
+    - pf_ring.yml
+  when: host_type == "loggers"
+
+- name: Include all Tasks for Standalone Sensor
+  include_tasks: "{{ item }}"
+  loop:
+    - ebs_vol.yml
+    - base.yml
+    - pf_ring.yml
+    - zeek.yml
+  when: host_type == "standalone"

@@ -1,0 +1,41 @@
+---
+# vars file for zeek
+zeek_url: https://github.com/zeek/zeek
+zeek_src_loc: /home
+zeek_src_dir: /home/zeek
+zeek_install_dir: /usr/local/zeek
+zeek_log_dir: /zeek_logs/logs
+zeek_spool_dir: /zeek_logs/spool
+ebs_dev: /dev/nvme1n1
+
+#cmake vars
+cmake_ver: 3.19.2
+cmake_url: https://cmake.org/files/v3.19/cmake-3.19.2.tar.gz
+cmake_src_loc: /usr/local/src
+cmake_src_dir: /usr/local/src/cmake-{{ cmake_ver }}
+
+# pf_ring vars
+pf_ring_url: https://github.com/ntop/PF_RING.git
+pf_ring_src_loc: /opt
+pf_ring_src_dir: /opt/PF_RING
+
+
+#NLB Addresses
+nlb_private_ip_a: ${nlb_priv_ip_a}
+nlb_private_ip_b: ${nlb_priv_ip_b}
+nlb_private_ip_c: ${nlb_priv_ip_c}
+
+packages:
+- git
+- gcc
+- gcc-c++
+- openssl-devel
+- flex
+- make
+- python37
+- bison
+- libpcap-devel
+- python-devel
+- swig
+- zlib-devel
+- python3-devel.x86_64

@@ -1,0 +1,65 @@
+---
+# logstash install tasks
+- name: check if logstash is installed
+  stat:
+    path: /etc/logstash
+  register: logstash_installed
+
+- name: Check if Java is installed
+  stat:
+    path: /etc/java
+  register: java_installed
+
+- name: Add Elastic GPG Key
+  rpm_key: 
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+  when: logstash_installed.stat.exists == False
+
+- name: Install java-openjdk
+  yum:
+    name: "java-{{ java_version }}-openjdk"
+    state: present
+  when: java_installed.stat.exists == False
+
+- name: Download Logstash rpm Package
+  get_url:
+    url: "{{ logstash_url }}"
+    dest: /tmp
+  when: logstash_installed.stat.exists == False
+
+- name: Install Logstash rpm Package
+  yum:
+    name: /tmp/logstash-{{ logstash_version }}.rpm
+    state: present
+  when: logstash_installed.stat.exists == False
+
+- name: Update Logstash JVM Options 1
+  replace:
+    path: /etc/logstash/jvm.options
+    regexp: '-Xms1g'
+    replace: '-Xms{{ logstash_jvm_options }}'
+
+- name: Update Logstash JVM Options 2
+  replace:
+    path: /etc/logstash/jvm.options
+    regexp: '-Xmx1g'
+    replace: '-Xmx{{ logstash_jvm_options }}'
+
+- name: Install logstash plugin s3 output
+  shell: ./logstash-plugin install logstash-output-s3
+  args:
+    chdir: /usr/share/logstash/bin/
+
+- name: Update Logstash plugins
+  shell: ./logstash-plugin update
+  args:
+    chdir: /usr/share/logstash/bin
+
+- name: Create logstash config files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0600
+  loop:
+    - { src: zeek/templates/logstash.conf.j2,                dest: /etc/logstash/conf.d/logstash.conf }

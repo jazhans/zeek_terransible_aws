@@ -1,0 +1,7 @@
+---
+  - hosts: zeek_sensors
+    become: true
+    roles:
+      - zeek
+    vars:
+      host_type: standalone

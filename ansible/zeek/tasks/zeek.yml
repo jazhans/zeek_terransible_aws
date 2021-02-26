@@ -1,0 +1,107 @@
+---
+# zeek tasks
+- name: See if Zeek src is downloaded...
+  stat:
+    path: "{{ zeek_src_dir }}"
+  register: zeek_src
+
+- name: See if Zeek is installed and Compiled...
+  stat:
+    path: "/usr/local/zeek"
+  register: zeek_installed
+
+- name: See if Zeek is running...
+  stat:
+    path: /usr/local/zeek/logs/current
+  register: zeek_running
+
+- name: Git Zeek
+  shell: git clone --recursive {{ zeek_url }}
+  args:
+    chdir: "{{ zeek_src_loc }}"
+  when: zeek_src.stat.exists == False
+
+- name: Wait until Cmake binary file is present...
+  wait_for:
+    path: "{{ cmake_src_dir }}/bin/cmake"
+  ignore_unreachable: yes
+
+- name: Configure Zeek
+  shell: ./configure --with-pcap={{ pf_ring_src_dir }} --cmake={{ cmake_src_dir }}/bin/cmake
+  args:
+    chdir: "{{ zeek_src_dir }}"
+  when: zeek_installed.stat.exists == False
+
+- name: Make Zeek
+  make:
+    chdir: "{{ zeek_src_dir }}"
+  when: zeek_installed.stat.exists == False
+
+- name: Make Install Zeek
+  shell: make install
+  args:
+    chdir: "{{ zeek_src_dir }}"
+  ignore_unreachable: yes
+  when: zeek_installed.stat.exists == False
+
+- name: Wait until zeekctl is available
+  wait_for:
+    path: /usr/local/zeek/bin/zeekctl
+    timeout: 3600
+  ignore_unreachable: yes
+
+- name: Insert json messages to config.
+  lineinfile:
+    path: "/usr/local/zeek/share/zeek/site/local.zeek"
+    line: '@load policy/tuning/json-logs.zeek'
+
+- name: Copy zeek node.cfg file sensor 1
+  copy:
+    src: zeek/files/node1.cfg
+    dest: /usr/local/zeek/etc/node.cfg
+    owner: root
+    group: root
+    mode: '0600'
+  when: inventory_hostname == "ise-dev1-ec2-zk-sensor-a"
+
+- name: Copy zeek node.cfg file sensor 2
+  copy:
+    src: zeek/files/node2.cfg
+    dest: /usr/local/zeek/etc/node.cfg
+    owner: root
+    group: root
+    mode: '0600'
+  when: inventory_hostname == "ise-dev1-ec2-zk-sensor-b"
+
+- name: Copy zeek node.cfg file sensor 3
+  copy:
+    src: zeek/files/node3.cfg
+    dest: /usr/local/zeek/etc/node.cfg
+    owner: root
+    group: root
+    mode: '0600'
+  when: inventory_hostname == "ise-dev1-ec2-zk-sensor-c"
+
+- name: Create zeek config files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "u=rw,g=r,o=r"
+  loop:
+    - { src: zeek/templates/zeekctl.cfg.j2,            dest: /usr/local/zeek/etc/zeekctl.cfg }
+
+- name: Create zeek log directories
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+    mode: 0750
+  loop:
+    - {path: "{{ zeek_log_dir }}", state: "directory" }
+    - {path: "{{ zeek_spool_dir }}", state: "directory" }
+    - {path: "{{ zeek_spool_dir }}/brokerstore", state: "directory" }
+
+- name: Start Zeek
+  shell: ./zeekctl install && ./zeekctl deploy
+  args:
+    chdir: /usr/local/zeek/bin/
+  when: zeek_running.stat.exists == False

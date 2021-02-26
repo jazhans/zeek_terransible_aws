@@ -1,0 +1,124 @@
+---
+# pf_ring Tasks
+- name: See if PR_RING src is downloaded...
+  stat: 
+    path: "{{ pf_ring_src_dir }}"
+  register: pf_ring_src
+
+- name: See if PF_RING is compiled and loaded into the kernel...
+  stat:
+    path: /etc/modules-load.d/pf_ring.conf
+  register: pf_ring_installed
+
+- name: Install Kernel Devel
+  shell: yum install "kernel-devel-uname-r == $(uname -r)" -y
+  args:
+    chdir: /home
+  when: pf_ring_installed.stat.exists == False
+
+- name: Install Epel Release
+  shell: amazon-linux-extras install epel -y 
+  args:
+    chdir: /home
+  when: pf_ring_installed.stat.exists == False
+
+- name: Update Yum
+  yum:
+    name: '*'
+    state: latest
+  when: pf_ring_installed.stat.exists == False
+  
+- name: Install DKMS
+  yum:
+    name: dkms
+    state: present
+  when: pf_ring_installed.stat.exists == False
+
+- name: Install PF_RING src
+  git:
+    repo: "{{ pf_ring_url }}"
+    dest: "{{ pf_ring_src_loc }}/PF_RING"
+  when: pf_ring_src.stat.exists == False
+
+- name: Reboot for Kernel Updates...
+  reboot:
+    reboot_timeout: 3600
+  when: pf_ring_installed.stat.exists == False
+
+- name: Make kernel PF_RING 1
+  make:
+    chdir: "{{ pf_ring_src_dir }}/kernel"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Insert module PF_RING
+  shell: insmod ./pf_ring.ko
+  args:
+    chdir: "{{ pf_ring_src_dir }}/kernel"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Make kernel PF_RING 2
+  make:
+    chdir: "{{ pf_ring_src_dir }}/userland"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Configure PF_RING 1
+  shell: ./configure --prefix={{ pf_ring_src_dir }}
+  args:
+    chdir: "{{ pf_ring_src_dir }}/userland/lib"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Make install userland/lib
+  make:
+    chdir: "{{ pf_ring_src_dir }}/userland/lib"
+    target: install
+  when: pf_ring_installed.stat.exists == False
+
+- name: Configure libpcap section
+  shell: ./configure --prefix={{ pf_ring_src_dir }}
+  args:
+    chdir: "{{ pf_ring_src_dir }}/userland/libpcap"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Make install libpcap section
+  make:
+    chdir: "{{ pf_ring_src_dir }}/userland/libpcap"
+    target: install
+  when: pf_ring_installed.stat.exists == False
+
+- name: Configure tcpdump section
+  shell: ./configure --prefix={{ pf_ring_src_dir }}
+  args:
+    chdir: "{{ pf_ring_src_dir }}/userland/tcpdump-4.9.3"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Make install userland/tcpdump
+  make:
+    chdir: "{{ pf_ring_src_dir }}/userland/tcpdump-4.9.3"
+    target: install
+  when: pf_ring_installed.stat.exists == False
+
+- name: Final Make PF_RING
+  make:
+    chdir: "{{ pf_ring_src_dir }}/kernel"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Final Make Install PF_RING
+  make:
+    chdir: "{{ pf_ring_src_dir }}/kernel"
+    target: install
+  when: pf_ring_installed.stat.exists == False
+
+- name: Install kernel module
+  shell: modprobe pf_ring
+  args:
+    chdir: "{{ pf_ring_src_dir }}/kernel"
+  when: pf_ring_installed.stat.exists == False
+
+- name: Copy pf_ring kernel module file
+  copy:
+    src: zeek/files/pf_ring.conf
+    dest: /etc/modules-load.d/pf_ring.conf
+    owner: root
+    group: root
+    mode: '0644'
+  when: pf_ring_installed.stat.exists == False
