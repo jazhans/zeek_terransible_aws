@@ -89,7 +89,7 @@ variable "instance-type" {
 }
 variable "default-ami" {
   type    = string
-  default = "" # ami id for image leveraged Most Appropriate would be AL2, Cent, RedHat
+  default = "ami-09c5e030f74651050" # ami id for image leveraged Most Appropriate would be AL2, Cent, RedHat
 }
 ##########################
 # TRAFFIC MIRRORING VARS #
