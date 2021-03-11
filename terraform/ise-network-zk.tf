@@ -5,7 +5,7 @@ data "aws_availability_zones" "available" {}
 #############
 # RESOURCES #
 #############
-#Create VPC for Zeek in us-gov-west-1
+# Create VPC for Zeek in us-gov-west-1
 resource "aws_vpc" "ise-vpc-zk" {
   provider             = aws.region-master
   cidr_block           = var.vpc-cidr
@@ -108,7 +108,7 @@ resource "aws_lb_listener" "ise-vxlan-lst-zk" {
     target_group_arn = aws_lb_target_group.ise-tg-zk.id
   }
 }
-#Attach ec2 instances to round robin lb logic
+# Attach ec2 instances to round robin lb logic
 resource "aws_lb_target_group_attachment" "ise-zk-attach-sensors-a" {
   count            = var.instances-per-subnet
   provider         = aws.region-master

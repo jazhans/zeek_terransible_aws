@@ -1,11 +1,17 @@
-# Create a key pair for logging into EC2 in us-gov-west-1
+###########################################################
+# Create a key pair for logging into EC2 in us-gov-west-1 #
+###########################################################
 resource "aws_key_pair" "ise-ky-zk" {
   provider   = aws.region-master
   key_name   = "${var.business-unit}-${var.env-loc}-ky-zk"
   public_key = file("~/.ssh/id_rsa.pub")
 }
-# Sensors tuneable to have multiple instances per subnet
-# Sensor group A
+##########################################################
+# Sensors tuneable to have multiple instances per subnet #
+##########################################################
+##################
+# Sensor group A #
+##################
 resource "aws_instance" "ise-ec2-zk-sensor-a" {
   count                       = var.instances-per-subnet
   provider                    = aws.region-master
@@ -41,7 +47,9 @@ resource "aws_volume_attachment" "ise-ec2-ebs-att-zk-a" {
   volume_id   = aws_ebs_volume.ise-ebs-zk-a[count.index].id
   instance_id = aws_instance.ise-ec2-zk-sensor-a[count.index].id
 }
-# Sensor group B
+##################
+# Sensor group B #
+##################
 resource "aws_instance" "ise-ec2-zk-sensor-b" {
   count                       = var.instances-per-subnet
   provider                    = aws.region-master
@@ -77,7 +85,9 @@ resource "aws_volume_attachment" "ise-ec2-ebs-att-zk-b" {
   volume_id   = aws_ebs_volume.ise-ebs-zk-b[count.index].id
   instance_id = aws_instance.ise-ec2-zk-sensor-b[count.index].id
 }
-# Sensor group C
+################## 
+# Sensor group C #
+##################
 resource "aws_instance" "ise-ec2-zk-sensor-c" {
   count                       = var.instances-per-subnet
   provider                    = aws.region-master

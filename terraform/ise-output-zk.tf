@@ -1,4 +1,6 @@
-# Public Sensor IPs
+#####################
+# Public Sensor IPs #
+#####################
 output "Zeek-Sensor-Public-IPs-A" {
   value = aws_instance.ise-ec2-zk-sensor-a.*.public_ip
 }
@@ -8,7 +10,9 @@ output "Zeek-Sensor-Public-IPs-B" {
 output "Zeek-Sensor-Public-IPs-C" {
   value = aws_instance.ise-ec2-zk-sensor-c.*.public_ip
 }
-# Private Sensor IPs
+######################
+# Private Sensor IPs #
+######################
 output "Zeek-Sensor-Private-IPs-A" {
   value = aws_instance.ise-ec2-zk-sensor-a.*.private_ip
 }
@@ -18,7 +22,9 @@ output "Zeek-Sensor-Private-IPs-B" {
 output "Zeek-Sensor-Private-IPs-C" {
   value = aws_instance.ise-ec2-zk-sensor-c.*.private_ip
 }
-# Dynamic Ansible Inventory Creation
+######################################
+# Dynamic Ansible Inventory Creation #
+######################################
 resource "local_file" "AnsibleInventory" {
   count   = var.instances-per-subnet  
   content = templatefile("inventory.tmpl",
@@ -34,7 +40,9 @@ resource "local_file" "AnsibleInventory" {
   filename        = "../ansible/inventory.yml"
   file_permission = "0644"
 }
-# NLB IP Info
+###############
+# NLB IP Info #
+###############
 data "aws_network_interface" "ise-nlb-zk" {
   provider = aws.region-master
   count    = var.subnet-count
@@ -47,7 +55,9 @@ data "aws_network_interface" "ise-nlb-zk" {
     values = toset([aws_subnet.ise-sn-zk[count.index].id])
   }
 }
-# Dynamic Ansible Variables Creation
+######################################
+# Dynamic Ansible Variables Creation #
+######################################
 resource "local_file" "AnsibleVars" {
   content = templatefile("vars.tmpl",
     {
@@ -59,7 +69,9 @@ resource "local_file" "AnsibleVars" {
   filename        = "../ansible/zeek/vars/main.yml"
   file_permission = "0644"
 }
-# Zeek node.cfg creation for 3 sensors
+########################################
+# Zeek node.cfg creation for 3 sensors #
+########################################
 resource "local_file" "zeekConfig1" {
   content = templatefile("node.cfg.tmpl",
     {
